@@ -2,257 +2,55 @@
   min-height: 100vh;
 }
 
-/* 侧边栏样式 */
-.main-sider {
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-}
-
-.desktop-sider {
-  display: block;
-}
-
-.sidebar-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-logo {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16px;
-  background: rgba(0, 0, 0, 0.2);
-  margin-bottom: 8px;
-}
-
-.logo-icon {
-  font-size: 24px;
-  color: #1890ff;
-}
-
-.logo-text {
-  margin-left: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-}
-
-.main-menu {
-  flex: 1;
-  border-right: 0;
-}
-
-.main-menu .ant-menu-item,
-.main-menu .ant-menu-submenu-title {
-  margin: 0;
-  height: 48px;
-  line-height: 48px;
-}
-
-.main-menu .ant-menu-item-selected {
-  background-color: #1890ff;
-}
-
-.main-menu .ant-menu-item-selected::after {
-  display: none;
-}
-
-/* 头部样式 */
-.main-header {
-  background: #fff;
-  padding: 0 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+.layout-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  background: #001529;
+  padding: 0 24px;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.collapse-btn,
-.mobile-menu-btn {
-  font-size: 18px;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.collapse-btn:hover,
-.mobile-menu-btn:hover {
-  background-color: #f0f0f0;
-}
-
-.page-title {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
+.header-left h3 {
+  color: white !important;
+  margin: 0;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-.notification-badge {
-  cursor: pointer;
-}
-
-.notification-btn {
-  font-size: 18px;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.notification-btn:hover {
-  background-color: #f0f0f0;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 .user-info:hover {
-  background-color: #f0f0f0;
-}
-
-.user-avatar {
-  flex-shrink: 0;
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.2;
-}
-
-.user-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-}
-
-.user-role {
-  font-size: 12px;
-  color: #666;
-}
-
-/* 内容区域样式 */
-.main-content {
-  background: #f0f2f5;
-  min-height: calc(100vh - 64px);
-}
-
-.content-wrapper {
-  padding: 24px;
-  min-height: calc(100vh - 64px - 48px);
-}
-
-/* 移动端抽屉样式 */
-.mobile-drawer .ant-drawer-body {
-  padding: 0;
-}
-
-.mobile-menu {
-  border-right: 0;
-}
-
-.mobile-menu .ant-menu-item,
-.mobile-menu .ant-menu-submenu-title {
-  margin: 0;
-  height: 48px;
-  line-height: 48px;
-}
-
-/* 响应式样式 */
-@media (min-width: 769px) {
-  .mobile-only {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .desktop-only {
-    display: none !important;
-  }
-  
-  .desktop-sider {
-    display: none !important;
-  }
-  
-  .main-header {
-    padding: 0 16px;
-  }
-  
-  .content-wrapper {
-    padding: 16px;
-  }
-  
-  .page-title {
-    font-size: 16px;
-  }
-  
-  .header-right {
-    gap: 8px;
-  }
-  
-  .user-info {
-    padding: 8px;
-    gap: 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-header {
-    padding: 0 12px;
-  }
-  
-  .content-wrapper {
-    padding: 12px;
-  }
-  
-  .header-left {
-    gap: 12px;
-  }
-  
-  .page-title {
-    font-size: 14px;
-  }
-}
-
-/* 主题色调整 */
-.main-layout .ant-layout-sider-dark {
-  background: #001529;
-}
-
-.main-layout .ant-menu-dark {
-  background: transparent;
-}
-
-.main-layout .ant-menu-dark .ant-menu-item-selected {
-  background-color: #1890ff;
-}
-
-.main-layout .ant-menu-dark .ant-menu-item:hover,
-.main-layout .ant-menu-dark .ant-menu-submenu-title:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+.username {
+  color: white;
+  margin-left: 8px;
+}
+
+.layout-sider {
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
+}
+
+.layout-content-wrapper {
+  background: #f0f2f5;
+}
+
+.layout-content {
+  margin: 24px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 6px;
+  min-height: 280px;
 }

@@ -1,5 +1,4 @@
 .login-container {
-  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -7,149 +6,29 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.login-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
-  opacity: 0.8;
-}
-
 .login-card {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-  margin: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
-.login-header h1 {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 8px;
-  font-weight: 600;
+.login-header h2 {
+  color: #1890ff;
+  margin-bottom: 0;
 }
 
-.login-header p {
+.login-footer {
+  margin-top: 16px;
+  text-align: center;
   color: #666;
-  font-size: 14px;
-  margin: 0;
+  font-size: 12px;
 }
 
-.login-tabs .ant-tabs-nav {
-  margin-bottom: 32px;
-}
-
-.login-tabs .ant-tabs-tab {
-  font-weight: 500;
-  font-size: 16px;
-}
-
-.login-tabs .ant-form-item {
-  margin-bottom: 20px;
-}
-
-.login-tabs .ant-input {
-  height: 48px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  transition: all 0.3s ease;
-}
-
-.login-tabs .ant-input:hover,
-.login-tabs .ant-input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-}
-
-.login-tabs .ant-btn {
-  height: 48px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 16px;
-  transition: all 0.3s ease;
-}
-
-.login-tabs .ant-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.login-tabs .ant-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
-}
-
-.login-demo-info {
-  margin-top: 24px;
-  padding: 16px;
-  background: #f8f9ff;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
-}
-
-.login-demo-info p {
+.login-footer p {
   margin: 4px 0;
-  font-size: 14px;
-  color: #666;
-}
-
-.role-selection {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.role-selection label {
-  font-size: 14px;
-  color: #333;
-  margin: 0;
-}
-
-.role-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.role-buttons .ant-btn {
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-/* 响应式设计 */
-@media (max-width: 480px) {
-  .login-card {
-    margin: 10px;
-    border-radius: 12px;
-  }
-  
-  .login-header h1 {
-    font-size: 24px;
-  }
-  
-  .login-tabs .ant-input,
-  .login-tabs .ant-btn {
-    height: 44px;
-  }
-  
-  .role-selection {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
 }

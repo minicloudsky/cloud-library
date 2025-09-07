@@ -1,179 +1,235 @@
-# 图书管理系统 - 微服务架构
+# 图书管理系统
 
-基于Spring Boot + Dubbo + K8s的图书管理系统，支持用户权限管理、图书管理、借阅管理等核心功能。
+一个基于微服务架构的图书管理系统，使用 Spring Boot + Dubbo + MyBatis + React + Ant Design + TypeScript 构建。
 
-## 🏗️ 系统架构
+## 系统架构
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│  Web Client │    │ Mobile App  │    │   Admin     │
-└──────┬──────┘    └──────┬──────┘    └──────┬──────┘
-       │                  │                  │
-       └──────────────────┼──────────────────┘
-                          │
-                   ┌──────▼──────┐
-                   │   Gateway   │
-                   │  (Port 8080)│
-                   └──────┬──────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-┌───────▼───────┐ ┌───────▼───────┐ ┌───────▼───────┐
-│ User Service  │ │ Book Service  │ │Borrow Service │
-│ (Port 8081)   │ │ (Port 8082)   │ │ (Port 8083)   │
-└───────┬───────┘ └───────┬───────┘ └───────┬───────┘
-        │                 │                 │
-        └─────────────────┼─────────────────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        │                 │                 │
-┌───────▼───────┐ ┌───────▼───────┐ ┌───────▼───────┐
-│     MySQL     │ │     Redis     │ │     Nacos     │
-│ (Port 3306)   │ │ (Port 6379)   │ │ (Port 8848)   │
-└───────────────┘ └───────────────┘ └───────────────┘
-```
+### 后端技术栈
+- **微服务框架**: Spring Boot 2.7.14
+- **RPC框架**: Apache Dubbo 3.2.4
+- **数据库**: MySQL 8.0
+- **缓存**: Redis
+- **ORM框架**: MyBatis Plus 3.5.3.2
+- **权限认证**: JWT + Spring Security
+- **连接池**: Druid
 
-## 🚀 核心功能
+### 前端技术栈
+- **前端框架**: React 18.2.0
+- **UI组件库**: Ant Design 5.12.8
+- **开发语言**: TypeScript 4.9.5
+- **HTTP客户端**: Axios 1.6.2
+- **路由管理**: React Router 6.20.1
+
+### 部署技术栈
+- **容器化**: Docker + Docker Compose
+- **容器编排**: Kubernetes
+- **反向代理**: Nginx
+
+## 功能特性
 
 ### 用户权限管理
-- **学生**: 借阅图书、归还图书、查看个人借阅记录
-- **老师**: 图书上下架、维护图书信息、维护学生信息
-- **管理员**: 支持所有操作，包括用户管理、系统配置
+- **学生**: 可以借阅图书、还书
+- **老师**: 可以上架、下架图书，维护图书信息，维护学生信息
+- **管理员**: 支持所有操作
 
-### 图书管理
-- 图书CRUD操作
-- 图书分类管理
-- 库存管理
-- 图书状态管理
+### 核心功能
+- 用户登录/注册
+- 图书信息管理（增删改查）
+- 图书借阅/归还
+- 借阅记录管理
+- 用户管理（仅管理员）
+- JWT权限控制
 
-### 借阅管理
-- 借书功能
-- 还书功能
-- 逾期处理
-- 罚金计算
+### 接口支持
+- HTTP REST API
+- Dubbo RPC接口
 
-## 🛠️ 技术栈
+## 快速开始
 
-- **后端框架**: Spring Boot 3.2.0
-- **微服务**: Spring Cloud Alibaba + Dubbo 3.2.8
-- **数据持久化**: MyBatis Plus 3.5.4 + MySQL 8.0
-- **缓存**: Redis
-- **注册中心**: Nacos
-- **网关**: Spring Cloud Gateway
-- **认证**: JWT
-- **容器化**: Docker + Kubernetes
-- **构建工具**: Maven
+### 环境要求
+- JDK 11+
+- Node.js 18+
+- MySQL 8.0+
+- Redis
+- Docker (可选)
+- Kubernetes (可选)
 
-## 📦 项目结构
+### 本地开发
+
+#### 方式1: 开发模式（推荐）
+```bash
+# 一键启动开发环境（后端+前端+基础设施）
+./start-dev.sh
+
+# 停止开发环境
+./stop-dev.sh
+```
+
+#### 方式2: 手动启动
+```bash
+# 1. 启动基础设施（MySQL + Redis）
+docker-compose up -d mysql redis
+
+# 2. 启动后端服务
+cd backend
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+
+# 3. 启动前端服务（新终端）
+cd frontend
+npm install
+npm start
+```
+
+#### 方式3: 纯本地环境
+如果您有本地MySQL和Redis：
+```bash
+# 1. 创建数据库并执行初始化脚本
+mysql -u root -p < backend/database/sql/init.sql
+
+# 2. 修改 backend/library-service/src/main/resources/application-local.yml
+# 3. 启动后端和前端（同方式2）
+```
+
+### Docker部署
+
+#### 1. 使用Docker Compose
+```bash
+# 启动所有服务
+docker-compose up -d
+
+# 查看服务状态
+docker-compose ps
+
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+```
+
+### Kubernetes部署
+
+#### 1. 部署到K8s集群
+```bash
+# 执行部署脚本
+./deploy-k8s.sh
+
+# 或者手动部署
+kubectl apply -f k8s/namespace/namespace.yaml
+kubectl apply -f k8s/infrastructure/
+kubectl apply -f k8s/services/
+```
+
+#### 2. 配置访问
+```bash
+# 获取Ingress IP
+kubectl get ingress -n library-system
+
+# 配置hosts文件
+echo "<INGRESS_IP> library.local" >> /etc/hosts
+echo "<INGRESS_IP> api.library.local" >> /etc/hosts
+```
+
+## 默认账户
+
+| 用户名 | 密码 | 角色 | 说明 |
+|--------|------|------|------|
+| admin | admin | 管理员 | 系统管理员账户 |
+| teacher01 | admin | 老师 | 教师账户 |
+| student01 | admin | 学生 | 学生账户 |
+
+## API文档
+
+### 认证接口
+- `POST /api/auth/login` - 用户登录
+- `POST /api/auth/register` - 用户注册
+- `GET /api/auth/current` - 获取当前用户信息
+
+### 图书管理接口
+- `GET /api/books/page` - 分页查询图书
+- `GET /api/books/{id}` - 获取图书详情
+- `POST /api/books` - 添加图书（老师/管理员）
+- `PUT /api/books/{id}` - 更新图书（老师/管理员）
+- `DELETE /api/books/{id}` - 删除图书（管理员）
+
+### 借阅管理接口
+- `POST /api/borrow/{bookId}` - 借阅图书
+- `PUT /api/borrow/return/{recordId}` - 归还图书
+- `GET /api/borrow/records` - 查询所有借阅记录（老师/管理员）
+- `GET /api/borrow/my-records` - 查询我的借阅记录
+
+### 用户管理接口
+- `GET /api/users/page` - 分页查询用户（管理员）
+- `GET /api/users/{id}` - 获取用户详情（管理员）
+- `PUT /api/users/{id}/status` - 更新用户状态（管理员）
+
+## Dubbo接口
+
+所有HTTP接口都有对应的Dubbo接口实现，可以通过Dubbo客户端调用。
+
+## 项目结构
 
 ```
 cloud-library/
-├── library-common/          # 公共模块
-│   ├── entity/             # 实体类
-│   ├── enums/              # 枚举
-│   ├── dto/                # 数据传输对象
-│   ├── utils/              # 工具类
-│   └── config/             # 配置类
-├── user-service/            # 用户服务
-├── book-service/            # 图书服务  
-├── borrow-service/          # 借阅服务
-├── gateway-service/         # 网关服务
-├── database/                # 数据库脚本
-├── k8s/                     # Kubernetes配置
+├── backend/                    # 后端服务
+│   ├── database/              # 数据库脚本
+│   ├── library-service/       # 图书管理服务
+│   │   ├── src/main/java/com/library/
+│   │   │   ├── controller/    # REST控制器
+│   │   │   ├── service/       # 业务服务层
+│   │   │   ├── mapper/        # 数据访问层
+│   │   │   ├── entity/        # 实体类
+│   │   │   ├── dto/           # 数据传输对象
+│   │   │   ├── enums/         # 枚举类
+│   │   │   ├── config/        # 配置类
+│   │   │   ├── security/      # 安全配置
+│   │   │   ├── utils/         # 工具类
+│   │   │   └── dubbo/         # Dubbo接口
+│   │   └── src/main/resources/
+│   ├── pom.xml                # Maven父项目配置
+│   └── Dockerfile             # Docker构建文件
+├── frontend/                  # 前端应用
+│   ├── public/               # 静态资源
+│   ├── src/
+│   │   ├── components/       # 公共组件
+│   │   ├── pages/           # 页面组件
+│   │   ├── services/        # API服务
+│   │   ├── utils/           # 工具函数
+│   │   └── types/           # TypeScript类型定义
+│   ├── package.json         # Node.js依赖
+│   ├── Dockerfile          # Docker构建文件
+│   └── nginx.conf          # Nginx配置
+├── k8s/                    # Kubernetes配置
+│   ├── namespace/          # 命名空间
 │   ├── infrastructure/     # 基础设施
-│   └── services/           # 微服务
-└── deploy.sh               # 部署脚本
+│   └── services/          # 应用服务
+├── docker-compose.yml     # Docker Compose配置
+├── deploy-k8s.sh         # K8s部署脚本
+└── README.md            # 项目说明
 ```
 
-## 🔧 快速开始
+## 开发指南
 
-### 本地开发环境 (推荐)
+### 后端开发
+1. 遵循RESTful API设计规范
+2. 使用MyBatis Plus简化数据库操作
+3. 统一异常处理和返回格式
+4. JWT token认证和权限控制
+5. 同时提供HTTP和Dubbo接口
 
-#### 环境要求
-- Java 17+
-- Maven 3.8+
-- Docker 20.0+
-- Docker Compose 2.0+
+### 前端开发
+1. 使用TypeScript开发，保证代码类型安全
+2. 组件化开发，遵循React最佳实践
+3. 使用Ant Design组件库，保证UI一致性
+4. 统一API调用和错误处理
+5. 响应式设计，适配不同屏幕尺寸
 
-#### Docker一键部署
-```bash
-# 克隆项目
-git clone <repository-url>
-cd cloud-library
+### 数据库设计
+1. 使用utf8mb4字符集
+2. 合理设计索引提高查询性能
+3. 使用枚举类型提高数据一致性
+4. 记录创建时间和更新时间
 
-# 一键启动所有服务
-./start-local.sh
-```
+## 许可证
 
-#### IDE开发模式
-```bash
-# 只启动基础设施
-./dev-local.sh
-
-# 然后在IDE中启动各个服务(Profile: local)
-```
-
-详细本地开发指南请参考：[README-LOCAL.md](README-LOCAL.md)
-
-### Kubernetes生产环境
-
-#### 环境要求
-- Java 17+
-- Maven 3.8+
-- Docker
-- Kubernetes 1.20+
-- kubectl
-
-#### 部署步骤
-```bash
-# 编译项目
-mvn clean compile -DskipTests
-
-# 部署到K8s
-./deploy.sh
-
-# 验证部署
-kubectl get pods -n library-system
-kubectl get services -n library-system
-```
-
-## 🌐 API接口
-
-### 网关地址
-- **HTTP访问**: `http://<gateway-service-ip>:8080`
-
-### 主要接口
-
-#### 用户管理
-- `POST /api/user/login` - 用户登录
-- `POST /api/user/register` - 用户注册  
-- `GET /api/user/info/{userId}` - 获取用户信息
-- `GET /api/user/list` - 获取用户列表
-
-#### 图书管理
-- `POST /api/book` - 添加图书
-- `PUT /api/book/{bookId}` - 更新图书
-- `DELETE /api/book/{bookId}` - 删除图书
-- `GET /api/book/{bookId}` - 获取图书详情
-- `GET /api/book/list` - 获取图书列表
-- `GET /api/book/available` - 获取可借图书
-
-#### 借阅管理
-- `POST /api/borrow` - 借阅图书
-- `PUT /api/borrow/{recordId}/return` - 归还图书
-- `GET /api/borrow/records` - 获取借阅记录
-
-## 🔐 默认账号
-
-- **管理员账号**: `admin`
-- **管理员密码**: `admin123`
-
-## 🔍 监控和日志
-
-- **健康检查**: `GET /actuator/health`
-- **服务信息**: `GET /actuator/info`
-- **日志级别**: DEBUG (开发环境)
-
-## 📄 许可证
-
-本项目采用 MIT 许可证。
+MIT License

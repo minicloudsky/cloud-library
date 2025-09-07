@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: library-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root123456"
+        - name: MYSQL_DATABASE
+          value: "library_management"
+        - name: MYSQL_USER
+          value: "library"
+        - name: MYSQL_PASSWORD
+          value: "library123456"
+        - name: TZ
+          value: "Asia/Shanghai"
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+        - name: init-sql
+          mountPath: /docker-entrypoint-initdb.d
+        args:
+        - "--default-authentication-plugin=mysql_native_password"
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+      - name: init-sql
+        configMap:
+          name: mysql-init-sql
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: library-system
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: library-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-sql
+  namespace: library-system
+data:
+  init.sql: |
+    -- 图书管理系统数据库初始化脚本
+    CREATE DATABASE IF NOT EXISTS `library_management` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+    USE `library_management`;
+
+    -- 用户表
+    CREATE TABLE IF NOT EXISTS `users` (
+        `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+        `username` varchar(50) NOT NULL COMMENT '用户名',
+        `password` varchar(255) NOT NULL COMMENT '密码',
+        `email` varchar(100) DEFAULT NULL COMMENT '邮箱',
+        `phone` varchar(20) DEFAULT NULL COMMENT '手机号',
+        `real_name` varchar(50) DEFAULT NULL COMMENT '真实姓名',
+        `student_id` varchar(20) DEFAULT NULL COMMENT '学号/工号',
+        `role` enum('STUDENT','TEACHER','ADMIN') NOT NULL DEFAULT 'STUDENT' COMMENT '用户角色',
+        `status` tinyint NOT NULL DEFAULT '1' COMMENT '状态：0-禁用，1-启用',
+        `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `idx_username` (`username`),
+        UNIQUE KEY `idx_email` (`email`),
+        KEY `idx_student_id` (`student_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
+
+    -- 插入默认管理员用户
+    INSERT IGNORE INTO `users` (`username`, `password`, `email`, `real_name`, `role`, `status`) 
+    VALUES ('admin', '$2a$10$9ZhDOBp.sRKat4l14ygu/.LscYlX1aMkLJJl.qjPH.W0GJ4FbKUby', 'admin@library.com', '系统管理员', 'ADMIN', 1);

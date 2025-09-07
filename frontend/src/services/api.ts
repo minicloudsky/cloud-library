@@ -1,122 +1,123 @@
-import request from '@/utils/request';
+import axios from 'axios';
+import { message } from 'antd';
 import type { 
-  ApiResponse, 
-  User, 
   LoginRequest, 
+  LoginResponse, 
   RegisterRequest, 
+  User, 
   Book, 
-  BookRequest, 
-  BookSearchParams,
   BorrowRecord, 
-  BorrowRequest,
-  BorrowSearchParams,
-  UserSearchParams,
-  PaginatedData 
-} from '@/types';
+  Result, 
+  PageResult 
+} from '../types';
 
-// 用户API
-export const userAPI = {
-  // 登录
-  login: (data: LoginRequest): Promise<ApiResponse<string>> => 
-    request.post('/user/login', data),
-  
-  // 注册
-  register: (data: RegisterRequest): Promise<ApiResponse<User>> => 
-    request.post('/user/register', data),
-  
-  // 获取用户信息
-  getUserInfo: (userId: number): Promise<ApiResponse<User>> => 
-    request.get(`/user/info/${userId}`),
-  
-  // 获取用户列表
-  getUserList: (params: UserSearchParams): Promise<ApiResponse<PaginatedData<User>>> => 
-    request.get('/user/list', { params }),
-  
-  // 更新用户
-  updateUser: (userId: number, data: Partial<User>): Promise<ApiResponse<User>> => 
-    request.put(`/user/${userId}`, data),
-  
-  // 删除用户
-  deleteUser: (userId: number): Promise<ApiResponse<void>> => 
-    request.delete(`/user/${userId}`),
-  
-  // 修改用户状态
-  changeUserStatus: (userId: number, status: boolean): Promise<ApiResponse<void>> => 
-    request.put(`/user/${userId}/status`, null, { params: { status } }),
-  
-  // 检查用户权限
-  hasPermission: (userId: number, permission: string): Promise<ApiResponse<boolean>> => 
-    request.get(`/user/${userId}/permission/${permission}`)
+const request = axios.create({
+  baseURL: '/api',
+  timeout: 10000,
+});
+
+request.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+request.interceptors.response.use(
+  (response) => {
+    const { data } = response;
+    if (data.code !== 200) {
+      message.error(data.message || '请求失败');
+      return Promise.reject(new Error(data.message || '请求失败'));
+    }
+    return data;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    message.error(error.response?.data?.message || '网络错误');
+    return Promise.reject(error);
+  }
+);
+
+export const authAPI = {
+  login: (params: LoginRequest): Promise<Result<LoginResponse>> =>
+    request.post('/auth/login', params),
+    
+  register: (params: RegisterRequest): Promise<Result<User>> =>
+    request.post('/auth/register', params),
+    
+  getCurrentUser: (): Promise<Result<User>> =>
+    request.get('/auth/current'),
 };
 
-// 图书API
 export const bookAPI = {
-  // 获取图书列表
-  getBookList: (params: BookSearchParams): Promise<ApiResponse<PaginatedData<Book>>> => 
-    request.get('/book/list', { params }),
-  
-  // 获取可借阅图书列表
-  getAvailableBooks: (params: BookSearchParams): Promise<ApiResponse<PaginatedData<Book>>> => 
-    request.get('/book/available', { params }),
-  
-  // 获取图书详情
-  getBookById: (bookId: number): Promise<ApiResponse<Book>> => 
-    request.get(`/book/${bookId}`),
-  
-  // 添加图书
-  addBook: (data: BookRequest): Promise<ApiResponse<Book>> => 
-    request.post('/book', data),
-  
-  // 更新图书
-  updateBook: (bookId: number, data: BookRequest): Promise<ApiResponse<Book>> => 
-    request.put(`/book/${bookId}`, data),
-  
-  // 删除图书
-  deleteBook: (bookId: number): Promise<ApiResponse<void>> => 
-    request.delete(`/book/${bookId}`),
-  
-  // 修改图书状态
-  changeBookStatus: (bookId: number, status: string): Promise<ApiResponse<void>> => 
-    request.put(`/book/${bookId}/status`, null, { params: { status } }),
-  
-  // 更新库存
-  updateStock: (bookId: number, stock: number): Promise<ApiResponse<void>> => 
-    request.put(`/book/${bookId}/stock`, null, { params: { stock } }),
-
-  // 减少库存
-  decreaseStock: (bookId: number, count: number): Promise<ApiResponse<boolean>> => 
-    request.post(`/book/${bookId}/decrease-stock`, null, { params: { count } }),
-
-  // 增加库存
-  increaseStock: (bookId: number, count: number): Promise<ApiResponse<void>> => 
-    request.post(`/book/${bookId}/increase-stock`, null, { params: { count } })
+  getBooks: (params: {
+    page?: number;
+    size?: number;
+    keyword?: string;
+    category?: string;
+  }): Promise<Result<PageResult<Book>>> =>
+    request.get('/books/page', { params }),
+    
+  getBook: (id: number): Promise<Result<Book>> =>
+    request.get(`/books/${id}`),
+    
+  addBook: (params: Partial<Book>): Promise<Result<Book>> =>
+    request.post('/books', params),
+    
+  updateBook: (id: number, params: Partial<Book>): Promise<Result<Book>> =>
+    request.put(`/books/${id}`, params),
+    
+  deleteBook: (id: number): Promise<Result<boolean>> =>
+    request.delete(`/books/${id}`),
+    
+  updateBookStatus: (id: number, status: string): Promise<Result<Book>> =>
+    request.put(`/books/${id}/status`, null, { params: { status } }),
 };
 
-// 借阅API
 export const borrowAPI = {
-  // 借阅图书
-  borrowBook: (data: BorrowRequest): Promise<ApiResponse<BorrowRecord>> => 
-    request.post('/borrow', data),
-  
-  // 归还图书
-  returnBook: (recordId: number): Promise<ApiResponse<void>> => 
-    request.put(`/borrow/${recordId}/return`),
-  
-  // 获取借阅记录
-  getBorrowRecords: (params: BorrowSearchParams): Promise<ApiResponse<PaginatedData<BorrowRecord>>> => 
+  borrowBook: (bookId: number): Promise<Result<BorrowRecord>> =>
+    request.post(`/borrow/${bookId}`),
+    
+  returnBook: (recordId: number): Promise<Result<BorrowRecord>> =>
+    request.put(`/borrow/return/${recordId}`),
+    
+  getBorrowRecords: (params: {
+    page?: number;
+    size?: number;
+    keyword?: string;
+    status?: string;
+  }): Promise<Result<PageResult<BorrowRecord>>> =>
     request.get('/borrow/records', { params }),
-  
-  // 获取用户借阅记录
-  getUserBorrowRecords: (userId: number, params: BorrowSearchParams): Promise<ApiResponse<PaginatedData<BorrowRecord>>> => 
-    request.get(`/borrow/user/${userId}`, { params }),
-  
-  // 获取图书借阅记录
-  getBookBorrowRecords: (bookId: number, params: BorrowSearchParams): Promise<ApiResponse<PaginatedData<BorrowRecord>>> => 
-    request.get(`/borrow/book/${bookId}`, { params })
+    
+  getMyBorrowRecords: (params: {
+    page?: number;
+    size?: number;
+  }): Promise<Result<PageResult<BorrowRecord>>> =>
+    request.get('/borrow/my-records', { params }),
 };
 
-export default {
-  userAPI,
-  bookAPI,
-  borrowAPI,
+export const userAPI = {
+  getUsers: (params: {
+    page?: number;
+    size?: number;
+    keyword?: string;
+  }): Promise<Result<PageResult<User>>> =>
+    request.get('/users/page', { params }),
+    
+  getUser: (id: number): Promise<Result<User>> =>
+    request.get(`/users/${id}`),
+    
+  updateUserStatus: (id: number, status: number): Promise<Result<User>> =>
+    request.put(`/users/${id}/status`, null, { params: { status } }),
 };

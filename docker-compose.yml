@@ -5,167 +5,70 @@ services:
   mysql:
     image: mysql:8.0
     container_name: library-mysql
-    restart: unless-stopped
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: library_system
-      MYSQL_CHARACTER_SET_SERVER: utf8mb4
-      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: library_management
+      MYSQL_USER: library
+      MYSQL_PASSWORD: library123456
+      TZ: Asia/Shanghai
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backend/database/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
     networks:
       - library-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
 
   # Redis缓存
   redis:
-    image: redis:7.0-alpine
+    image: redis:7-alpine
     container_name: library-redis
-    restart: unless-stopped
+    restart: always
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
       - library-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
 
-  # 用户服务
-  user-service:
+  # 后端服务
+  backend:
     build:
-      context: .
-      dockerfile: Dockerfile.common
-      args:
-        SERVICE_NAME: user-service
-        PORT: 8081
-    container_name: library-user-service
-    restart: unless-stopped
-    ports:
-      - "8081:8081"
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/library_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-      SPRING_REDIS_HOST: redis
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - library-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # 图书服务
-  book-service:
-    build:
-      context: .
-      dockerfile: Dockerfile.common
-      args:
-        SERVICE_NAME: book-service
-        PORT: 8082
-    container_name: library-book-service
-    restart: unless-stopped
-    ports:
-      - "8082:8082"
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/library_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-      SPRING_REDIS_HOST: redis
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - library-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # 借阅服务
-  borrow-service:
-    build:
-      context: .
-      dockerfile: Dockerfile.common
-      args:
-        SERVICE_NAME: borrow-service
-        PORT: 8083
-    container_name: library-borrow-service
-    restart: unless-stopped
-    ports:
-      - "8083:8083"
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/library_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-      SPRING_REDIS_HOST: redis
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - library-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # 网关服务
-  gateway-service:
-    build:
-      context: .
-      dockerfile: Dockerfile.common
-      args:
-        SERVICE_NAME: gateway-service
-        PORT: 8080
-    container_name: library-gateway
-    restart: unless-stopped
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: library-backend
+    restart: always
     ports:
       - "8080:8080"
+      - "20880:20880"
     environment:
-      SPRING_PROFILES_ACTIVE: local
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/library_management?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root123456
       SPRING_REDIS_HOST: redis
-      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://user-service:8081
-      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://book-service:8082
-      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://borrow-service:8083
+      SPRING_REDIS_PORT: 6379
     depends_on:
-      user-service:
-        condition: service_healthy
-      book-service:
-        condition: service_healthy
-      borrow-service:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - mysql
+      - redis
     networks:
       - library-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: library-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - library-network
 
 volumes:
   mysql_data:
