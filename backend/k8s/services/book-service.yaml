@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-service
+  namespace: library-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: book-service
+  template:
+    metadata:
+      labels:
+        app: book-service
+    spec:
+      containers:
+      - name: book-service
+        image: library/book-service:latest
+        ports:
+        - containerPort: 8082
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "123456"
+        - name: NACOS_NAMESPACE
+          value: "public"
+        - name: NACOS_GROUP
+          value: "DEFAULT_GROUP"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: book-service
+  namespace: library-system
+spec:
+  selector:
+    app: book-service
+  ports:
+  - port: 8082
+    targetPort: 8082
+  type: ClusterIP

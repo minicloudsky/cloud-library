@@ -1,0 +1,44 @@
+# 通用的多阶段构建Dockerfile
+FROM maven:3.8.6-eclipse-temurin-17 AS build
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制pom文件
+COPY pom.xml .
+COPY library-common library-common
+
+# 复制各服务的pom文件
+COPY user-service/pom.xml user-service/
+COPY book-service/pom.xml book-service/
+COPY borrow-service/pom.xml borrow-service/
+COPY gateway-service/pom.xml gateway-service/
+
+# 下载依赖
+RUN mvn dependency:go-offline
+
+# 复制源代码
+COPY library-common/src library-common/src
+ARG SERVICE_NAME
+COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src
+
+# 编译项目
+RUN mvn clean package -DskipTests -pl ${SERVICE_NAME} -am
+
+FROM eclipse-temurin:17-jdk-alpine
+
+# 安装curl用于健康检查
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+ARG SERVICE_NAME
+COPY --from=build /app/${SERVICE_NAME}/target/*.jar app.jar
+
+ARG PORT
+EXPOSE ${PORT}
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s \
+  CMD curl -f http://localhost:${PORT}/actuator/health || exit 1
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

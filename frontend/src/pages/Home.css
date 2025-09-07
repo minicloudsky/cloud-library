@@ -1,0 +1,111 @@
+.home-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-section {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  color: white;
+}
+
+.welcome-section h2 {
+  color: white !important;
+  margin-bottom: 8px;
+}
+
+.statistics-section {
+  margin-bottom: 24px;
+}
+
+.statistics-section .ant-card {
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.statistics-section .ant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.content-section {
+  margin-bottom: 24px;
+}
+
+.section-card {
+  height: 400px;
+  overflow-y: auto;
+}
+
+.section-card .ant-card-body {
+  height: calc(100% - 57px);
+}
+
+.access-info {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.access-info p {
+  margin-top: 12px;
+  color: #666;
+}
+
+.quick-actions {
+  margin-bottom: 24px;
+}
+
+.action-card {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #1890ff;
+}
+
+.action-content {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.action-icon {
+  font-size: 32px;
+  color: #1890ff;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.action-content .ant-typography {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 16px;
+  }
+  
+  .welcome-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .section-card {
+    height: 300px;
+  }
+  
+  .action-content {
+    padding: 16px 8px;
+  }
+  
+  .action-icon {
+    font-size: 24px;
+  }
+}

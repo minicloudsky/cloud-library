@@ -1,0 +1,75 @@
+.book-browse-container {
+  padding: 24px;
+}
+
+.header-card {
+  margin-bottom: 16px;
+  border-left: 4px solid #1890ff;
+}
+
+.filter-card {
+  margin-bottom: 16px;
+}
+
+.book-info .book-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #262626;
+  margin-bottom: 4px;
+}
+
+.book-info .book-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.book-info .book-meta .isbn {
+  font-family: monospace;
+}
+
+.stock-info {
+  text-align: center;
+}
+
+.stock-info > div {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1890ff;
+}
+
+.book-detail-modal .book-detail {
+  padding: 16px 0;
+}
+
+.borrow-actions {
+  margin-top: 24px;
+  text-align: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.borrow-actions .ant-btn {
+  min-width: 120px;
+}
+
+@media (max-width: 768px) {
+  .book-browse-container {
+    padding: 16px;
+  }
+  
+  .book-info .book-meta {
+    font-size: 12px;
+  }
+  
+  .borrow-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .borrow-actions .ant-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}

@@ -1,0 +1,96 @@
+.user-manage-container {
+  padding: 24px;
+}
+
+.access-denied {
+  padding: 24px;
+}
+
+.header-card {
+  margin-bottom: 16px;
+  border-left: 4px solid #1890ff;
+}
+
+.statistics-card {
+  margin-bottom: 16px;
+}
+
+.toolbar-card {
+  margin-bottom: 16px;
+}
+
+.user-info .user-basic {
+  display: flex;
+  align-items: center;
+}
+
+.user-info .user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #262626;
+}
+
+.contact-info {
+  font-size: 12px;
+}
+
+.contact-info > div {
+  margin-bottom: 2px;
+}
+
+/* 响应式处理 */
+@media (max-width: 768px) {
+  .user-manage-container {
+    padding: 16px;
+  }
+  
+  .access-denied {
+    padding: 16px;
+  }
+  
+  .statistics-card .ant-col {
+    margin-bottom: 16px;
+  }
+  
+  .toolbar-card .ant-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .toolbar-card .ant-col:last-child {
+    text-align: left !important;
+  }
+  
+  .user-info,
+  .contact-info {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .statistics-card .ant-row {
+    gap: 8px;
+  }
+  
+  .statistics-card .ant-statistic-title {
+    font-size: 12px;
+  }
+  
+  .statistics-card .ant-statistic-content-value {
+    font-size: 16px;
+  }
+  
+  .toolbar-card .ant-space {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .toolbar-card .ant-space .ant-space-item {
+    width: 100%;
+  }
+  
+  .toolbar-card .ant-input-search,
+  .toolbar-card .ant-select {
+    width: 100% !important;
+  }
+}

@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: library-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "123456"
+        - name: MYSQL_DATABASE
+          value: "library_system"
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+      - name: init-script
+        configMap:
+          name: mysql-init-script
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: library-system
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: library-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: library-system
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS library_system DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    USE library_system;
+    
+    CREATE TABLE users (
+        id BIGINT(20) NOT NULL COMMENT '用户ID',
+        username VARCHAR(50) NOT NULL COMMENT '用户名',
+        password VARCHAR(255) NOT NULL COMMENT '密码',
+        real_name VARCHAR(50) NOT NULL COMMENT '真实姓名',
+        email VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
+        phone VARCHAR(20) DEFAULT NULL COMMENT '手机号',
+        role TINYINT(1) NOT NULL COMMENT '角色：1-学生，2-老师，3-管理员',
+        is_active TINYINT(1) DEFAULT 1 COMMENT '是否激活：0-否，1-是',
+        create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        is_deleted TINYINT(1) DEFAULT 0 COMMENT '是否删除：0-否，1-是',
+        PRIMARY KEY (id),
+        UNIQUE KEY uk_username (username)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    
+    CREATE TABLE books (
+        id BIGINT(20) NOT NULL COMMENT '图书ID',
+        title VARCHAR(200) NOT NULL COMMENT '书名',
+        author VARCHAR(100) NOT NULL COMMENT '作者',
+        isbn VARCHAR(20) NOT NULL COMMENT 'ISBN',
+        publisher VARCHAR(100) DEFAULT NULL COMMENT '出版社',
+        publish_date DATE DEFAULT NULL COMMENT '出版日期',
+        category VARCHAR(50) DEFAULT NULL COMMENT '分类',
+        description TEXT DEFAULT NULL COMMENT '描述',
+        price DECIMAL(10,2) DEFAULT NULL COMMENT '价格',
+        stock INT(11) NOT NULL DEFAULT 0 COMMENT '库存总量',
+        available_stock INT(11) NOT NULL DEFAULT 0 COMMENT '可借数量',
+        status TINYINT(1) NOT NULL DEFAULT 1 COMMENT '状态：1-可借阅，2-不可借阅，3-维护中，4-丢失',
+        book_cover VARCHAR(255) DEFAULT NULL COMMENT '封面图片URL',
+        create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        is_deleted TINYINT(1) DEFAULT 0 COMMENT '是否删除：0-否，1-是',
+        PRIMARY KEY (id),
+        UNIQUE KEY uk_isbn (isbn)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    
+    CREATE TABLE borrow_records (
+        id BIGINT(20) NOT NULL COMMENT '记录ID',
+        user_id BIGINT(20) NOT NULL COMMENT '用户ID',
+        book_id BIGINT(20) NOT NULL COMMENT '图书ID',
+        borrow_date DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '借阅日期',
+        due_date DATETIME NOT NULL COMMENT '应还日期',
+        return_date DATETIME DEFAULT NULL COMMENT '实际还书日期',
+        status TINYINT(1) NOT NULL DEFAULT 1 COMMENT '状态：1-已借出，2-已归还，3-逾期，4-丢失，5-损坏',
+        fine_amount DECIMAL(10,2) DEFAULT 0.00 COMMENT '罚金金额',
+        remarks VARCHAR(500) DEFAULT NULL COMMENT '备注',
+        create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+        update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+        is_deleted TINYINT(1) DEFAULT 0 COMMENT '是否删除：0-否，1-是',
+        PRIMARY KEY (id),
+        KEY idx_user_id (user_id),
+        KEY idx_book_id (book_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    
+    INSERT INTO users (id, username, password, real_name, email, role, is_active) VALUES
+    (1, 'admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKTn5MvPgXHkr8eLI5vSj.HTxWDa', '系统管理员', 'admin@library.com', 3, 1);

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nacos
+  namespace: library-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nacos
+  template:
+    metadata:
+      labels:
+        app: nacos
+    spec:
+      containers:
+      - name: nacos
+        image: nacos/nacos-server:v2.2.3
+        ports:
+        - containerPort: 8848
+        env:
+        - name: MODE
+          value: "standalone"
+        - name: NACOS_AUTH_ENABLE
+          value: "true"
+        volumeMounts:
+        - name: nacos-data
+          mountPath: /home/nacos/data
+      volumes:
+      - name: nacos-data
+        persistentVolumeClaim:
+          claimName: nacos-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nacos-service
+  namespace: library-system
+spec:
+  selector:
+    app: nacos
+  ports:
+  - port: 8848
+    targetPort: 8848
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nacos-pvc
+  namespace: library-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
